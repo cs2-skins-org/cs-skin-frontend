@@ -1,0 +1,14 @@
+<app-item-modal #itemModal></app-item-modal>
+
+<div class="page-container">
+  <h1>CS2 Stickers</h1>
+  
+  <div class="items-grid">
+    <div class="item-card" *ngFor="let sticker of stickers" 
+         (click)="itemModal.openModal(sticker, 'sticker')">
+      <img [src]="sticker.image_path" [alt]="sticker.name">
+      <h3>{{ sticker.name }}</h3>
+      <p>{{ sticker.rarity }}</p>
+    </div>
+  </div>
+</div>

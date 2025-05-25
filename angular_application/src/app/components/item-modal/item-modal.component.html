@@ -1,0 +1,27 @@
+<div class="modal-backdrop" *ngIf="isOpen" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <button class="close-button" (click)="closeModal()">×</button>
+    
+    <ng-container *ngIf="item">
+      <div *ngIf="type === 'skin'; else stickerTemplate">
+        <h2>{{ getSkinName() }}</h2>
+        <img [src]="getSkinImage()" [alt]="getSkinName()">
+        <p>Weapon: {{ getSkinWeaponType() }}</p>
+        <p>Rarity: {{ getSkinRarity() }}</p>
+        <p>Price: ${{ getSkinPrice() }}</p>
+      </div>
+      
+      <ng-template #stickerTemplate>
+        <div *ngIf="type === 'sticker'">
+          <h2>{{ getStickerName() }}</h2>
+          <img [src]="getStickerImage()" [alt]="getStickerName()">
+          <p>Rarity: {{ getStickerRarity() }}</p>
+        </div>
+      </ng-template>
+
+      <button class="add-to-cart" (click)="addToCart()">
+        Add to Cart
+      </button>
+    </ng-container>
+  </div>
+</div>
