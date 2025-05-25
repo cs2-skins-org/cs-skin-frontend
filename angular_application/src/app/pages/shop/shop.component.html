@@ -1,0 +1,18 @@
+<app-item-modal #itemModal></app-item-modal>
+
+<div class="shop-container">
+  <div class="skins-grid">
+    <div class="skin-card" *ngFor="let instance of filteredSkins" 
+    (click)="getSkinDetails(instance) ? itemModal.openModal(getSkinDetails(instance)!, 'skin') : null">
+      <div class="skin-image">
+        <img [src]="getSkinDetails(instance)?.image_path" 
+             [alt]="getSkinDetails(instance)?.name">
+        <span *ngIf="instance.is_stattrak" class="stattrak">ST</span>
+      </div>
+      <div class="skin-info">
+        <h3>{{ getSkinDetails(instance)?.name }}</h3>
+        <p class="price">${{ getSkinDetails(instance)?.base_price?.toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+</div>

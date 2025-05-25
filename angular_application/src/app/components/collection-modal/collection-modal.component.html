@@ -1,0 +1,17 @@
+<div class="modal-backdrop" *ngIf="isOpen">
+  <div class="modal-content">
+    <button class="close-button" (click)="onClose()">×</button>
+    
+    <h2>{{ collection?.name }} Collection</h2>
+    <p class="release-year">Released: {{ collection?.release_year }}</p>
+    
+    <div class="collection-items-grid">
+      <div class="collection-item" *ngFor="let item of items">
+        <img [src]="item.image_path" [alt]="item.name">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.weapon_type }}</p>
+        <p class="price">${{ item.base_price.toFixed(2) }}</p>
+      </div>
+    </div>
+  </div>
+</div>
