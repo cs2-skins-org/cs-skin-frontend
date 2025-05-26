@@ -1,31 +1,33 @@
-<div class="modal-backdrop" *ngIf="isOpen" (click)="toggleCart()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <h2>Your Cart</h2>
-    
-    <div class="cart-items">
-      <div class="cart-item" *ngFor="let item of cartItems; let i = index">
-        <img [src]="item.image_path" [alt]="item.name">
-        <div class="item-info">
-          <h3>{{ item.name }}</h3>
-          <p>{{ getItemType(item) }}</p>
-          <p class="price">${{ item.base_price.toFixed(2) }}</p>
+<div *ngIf="!hideCart">
+  <div class="modal-backdrop" *ngIf="isOpen" (click)="toggleCart()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Your Cart</h2>
+      
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of cartItems; let i = index">
+          <img [src]="item.image_path" [alt]="item.name">
+          <div class="item-info">
+            <h3>{{ item.name }}</h3>
+            <p>{{ getItemType(item) }}</p>
+            <p class="price">${{ item.base_price.toFixed(2) }}</p>
+          </div>
+          <button class="remove-btn" (click)="removeItem(i)">×</button>
         </div>
-        <button class="remove-btn" (click)="removeItem(i)">×</button>
+      </div>
+      
+      <div class="cart-footer">
+        <p class="total">Total: ${{ getTotal().toFixed(2) }}</p>
+        <button class="checkout-btn" (click)="checkout()">
+          Proceed to Checkout
+        </button>
       </div>
     </div>
-    
-    <div class="cart-footer">
-      <p class="total">Total: ${{ getTotal().toFixed(2) }}</p>
-      <button class="checkout-btn" (click)="checkout()">
-        Proceed to Checkout
-      </button>
-    </div>
   </div>
-</div>
 
-<div class="cart-button" (click)="toggleCart()">
-  <img src="assets/cart.jpg" alt="Cart">
-  <span class="badge" *ngIf="cartItems.length > 0">
-    {{ cartItems.length }}
-  </span>
+  <div class="cart-button" (click)="toggleCart()">
+    <img src="assets/cart.jpg" alt="Cart">
+    <span class="badge" *ngIf="cartItems.length > 0">
+      {{ cartItems.length }}
+    </span>
+  </div>
 </div>

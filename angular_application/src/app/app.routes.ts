@@ -19,5 +19,6 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent, title: 'Authentication' },
   { path: 'stickers', component: StickersComponent },
   { path: 'collections', component: CollectionsComponent },
-  { path: 'auth', component: AuthComponent, title: 'Login' }
+  { path: 'auth', component: AuthComponent, title: 'Login' },
+  { path: 'profile', component: ProfileComponent, title: 'Your Profile' }
 ];
