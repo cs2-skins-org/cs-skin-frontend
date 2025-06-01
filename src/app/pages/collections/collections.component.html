@@ -1,15 +1,19 @@
 <!-- src/app/pages/collections/collections.component.html -->
-<div class="collections-container">
-  <h2 class="page-title">Collections</h2>
+<div class="collections-container max-w-7xl mx-auto px-4">
+  <!-- Header with Animation -->
+  <div class="header-section mb-8 animate-fade-in">
+    <h2 class="page-title text-4xl font-bold text-white mb-2">Collections</h2>
+    <p class="text-gray-400">Browse all CS2 weapon collections</p>
+  </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading" class="flex flex-col items-center gap-4 py-16">
+  <div *ngIf="loading" class="flex flex-col items-center gap-4 py-16 animate-fade-in">
     <div class="loading-spinner"></div>
     <p class="text-gray-300">Loading collections...</p>
   </div>
 
   <!-- Error State -->
-  <div *ngIf="error" class="text-center py-16 text-cs-red">
+  <div *ngIf="error" class="text-center py-16 text-red-500 animate-fade-in">
     <p class="text-xl mb-4">{{ error }}</p>
     <button class="btn-primary" (click)="loadCollections()">Try Again</button>
   </div>
@@ -17,34 +21,81 @@
   <!-- Collections Grid -->
   <div
     *ngIf="!loading && !error && collections.length > 0"
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+    class="collections-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
   >
     <div
-      *ngFor="let collection of collections; trackBy: trackById"
-      class="collection-card card group cursor-pointer hover:scale-105 transition-transform duration-300"
+      *ngFor="let collection of collections; let i = index; trackBy: trackById"
+      class="collection-card group relative overflow-hidden rounded-xl cursor-pointer"
+      [style.animation-delay]="i * 0.1 + 's'"
+      (click)="viewCollection(collection.id)"
     >
-      <!-- Collection Image Placeholder -->
-      <div
-        class="aspect-square bg-gradient-to-br from-cs-blue/20 to-cs-purple/20 rounded-lg mb-4 flex items-center justify-center border border-cs-blue/30"
-      >
-        <div class="text-4xl text-cs-blue opacity-50">🎯</div>
-      </div>
+      <!-- Animated Border -->
+      <div class="animated-border"></div>
+      
+      <!-- Card Inner -->
+      <div class="card-inner relative z-10">
+        <!-- Collection Image with Parallax Effect -->
+        <div class="collection-image-wrapper relative overflow-hidden rounded-t-lg">
+          <div 
+            class="collection-image aspect-[16/9] relative overflow-hidden transform transition-all duration-700 group-hover:scale-110"
+            [style.background-image]="getCollectionBackgroundStyle(collection)"
+            [style.background-size]="'cover'"
+            [style.background-position]="'center'"
+            [style.background-repeat]="'no-repeat'"
+          >
+            <!-- Gradient Overlays -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-60"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            
+            <!-- Shine Effect -->
+            <div class="shine-effect"></div>
+            
+            <!-- Fallback when image not loaded -->
+            <div 
+              class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black flex items-center justify-center transition-opacity duration-300"
+              [class.opacity-100]="!isImageLoaded(collection)"
+              [class.opacity-0]="isImageLoaded(collection)"
+            >
+              <!-- Animated Fallback Icon -->
+              <div class="collection-icon-wrapper">
+                <div class="collection-icon text-6xl">🎯</div>
+              </div>
+            </div>
+            
+            <!-- Loading Spinner -->
+            <div 
+              *ngIf="isImageLoading(collection)" 
+              class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            >
+              <div class="loading-spinner"></div>
+            </div>
+            
+            <!-- Collection Year Badge -->
+            <div class="absolute top-4 right-4 z-20">
+              <span class="year-badge">
+                {{ collection.release_year }}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      <!-- Collection Info -->
-      <div class="collection-info flex-1">
-        <h3
-          class="text-xl font-semibold text-white mb-2 group-hover:text-cs-blue transition-colors"
-        >
-          {{ collection.name }}
-        </h3>
-        <p class="text-gray-400 text-sm mb-4">
-          Released: {{ collection.release_year }}
-        </p>
-      </div>
-
-      <!-- Collection Actions -->
-      <div class="collection-actions">
-        <button class="btn-primary w-full text-sm py-2">View Skins</button>
+        <!-- Collection Info -->
+        <div class="collection-info p-4 bg-gradient-to-b from-gray-900/90 to-gray-800/90 backdrop-blur-sm">
+          <h3 class="collection-name text-xl font-bold text-white mb-2 transition-all duration-300 group-hover:text-blue-400">
+            {{ collection.name }}
+          </h3>
+          
+          <!-- Hover Details -->
+          <div class="collection-details opacity-0 max-h-0 overflow-hidden group-hover:opacity-100 group-hover:max-h-20 transition-all duration-500">
+            <p class="text-gray-400 text-sm mb-2">Click to view all skins</p>
+          </div>
+          
+          <!-- Action Button -->
+          <button class="view-btn">
+            <span class="btn-text">View Collection</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -52,10 +103,10 @@
   <!-- Empty State -->
   <div
     *ngIf="!loading && !error && collections.length === 0"
-    class="text-center py-16 text-gray-400"
+    class="empty-state text-center py-16 animate-fade-in"
   >
-    <div class="text-6xl mb-4">📦</div>
+    <div class="empty-icon text-6xl mb-4 animate-bounce">📦</div>
     <h3 class="text-2xl text-white mb-2">No Collections Found</h3>
-    <p>There are no collections available at the moment.</p>
+    <p class="text-gray-400">There are no collections available at the moment.</p>
   </div>
 </div>

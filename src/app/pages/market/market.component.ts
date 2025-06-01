@@ -289,6 +289,13 @@ export class MarketComponent implements OnInit {
 
   // Enhanced background style method
   getSkinBackgroundStyle(skin: any): string {
+    const skinWithState = skin as SkinWithImageState;
+    
+    // If we have an alternative URL that works, use it
+    if (skinWithState.alternativeImageUrl) {
+      return `url('${skinWithState.alternativeImageUrl}')`;
+    }
+    
     const imageUrl = this.getSkinImageUrl(skin);
     this.preloadImage(imageUrl, skin);
     return `url('${imageUrl}')`;

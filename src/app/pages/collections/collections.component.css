@@ -1,8 +1,370 @@
 /* src/app/pages/collections/collections.component.css */
 
-.collections-container {
-  @apply py-8;
+/* Container Styles
+  .collections-container {
+    @apply py-8;
+  } */
+
+/* Header Animation */
+.header-section {
+  animation: slideDown 0.6s ease-out;
 }
 
-/* Additional custom styles can be added here if needed */
-/* Most styling is handled by Tailwind CSS classes in the HTML */
+/* Collection Card Base */
+.collection-card {
+  position: relative;
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.collection-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Animated Border Effect */
+.animated-border {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    #3b82f6,
+    #8b5cf6,
+    #ec4899,
+    #3b82f6,
+    transparent
+  );
+  background-size: 400% 400%;
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  animation: borderRotate 3s linear infinite;
+  z-index: 0;
+}
+
+.collection-card:hover .animated-border {
+  opacity: 1;
+}
+
+/* Card Inner */
+.card-inner {
+  background: rgba(17, 24, 39, 0.9);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+/* Collection Image Wrapper */
+.collection-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: #1f2937;
+}
+
+/* Collection Image */
+.collection-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Shine Effect */
+.shine-effect {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg) translateY(100%);
+  transition: transform 0.6s;
+}
+
+.collection-card:hover .shine-effect {
+  transform: rotate(45deg) translateY(-100%);
+}
+
+/* Year Badge */
+.year-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fbbf24;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.collection-card:hover .year-badge {
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Collection Icon Animation */
+.collection-icon-wrapper {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.collection-icon {
+  animation: rotate 8s linear infinite;
+  filter: grayscale(0.5);
+  opacity: 0.7;
+}
+
+/* Collection Info */
+.collection-info {
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+/* Collection Name */
+.collection-name {
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.collection-card:hover .collection-name {
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  letter-spacing: 0.05em;
+}
+
+/* View Button */
+.view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.view-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.collection-card:hover .view-btn::before {
+  left: 100%;
+}
+
+.view-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-icon {
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.collection-card:hover .btn-icon {
+  transform: translateX(5px);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #374151;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Empty State */
+.empty-state {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.empty-icon {
+  filter: grayscale(0.3);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes borderRotate {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .collection-card {
+    margin-bottom: 1rem;
+  }
+  
+  .collection-card:hover {
+    transform: translateY(-5px) scale(1.01);
+  }
+  
+  /* Disable heavy animations on mobile */
+  .shine-effect,
+  .animated-border {
+    display: none;
+  }
+}
+
+/* Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-5px);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* Performance Optimizations */
+.collection-card,
+.collection-image,
+.view-btn {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Tailwind Utilities Override */
+.aspect-\[16\/9\] {
+  aspect-ratio: 16 / 9;
+}
+
+/* Additional Hover Effects */
+.collection-card:hover .collection-details {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus States for Accessibility */
+.view-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.collection-card:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 4px;
+}
