@@ -1,4 +1,4 @@
-// src/app/pages/market/market.component.ts - FINAL VERSION
+// src/app/pages/market/market.component.ts - UPDATED WITH NEON ANIMATIONS
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
@@ -14,6 +14,10 @@ import { MarketListing, SkinInstance, Collection, Rarity, Wear, Skin } from '../
 interface SkinWithImageState extends Skin {
   imageLoaded?: boolean;
   imageFallbackAttempted?: boolean;
+  backgroundImageAttempted?: boolean;
+  imageLoading?: boolean;
+  fallbackAttempted?: boolean;
+  alternativeImageUrl?: string;
 }
 
 @Component({
@@ -115,8 +119,13 @@ export class MarketComponent implements OnInit {
       this.marketListings.forEach(listing => {
         if (listing.skin) {
           const skinWithState = listing.skin as SkinWithImageState;
-          skinWithState.imageLoaded = undefined; // Start as undefined (not loaded yet)
+          skinWithState.imageLoaded = undefined;
           skinWithState.imageFallbackAttempted = false;
+          skinWithState.backgroundImageAttempted = false;
+          skinWithState.imageLoading = false;
+          skinWithState.fallbackAttempted = false;
+          // Initialize purchasing state
+          listing.purchasing = false;
         }
       });
       
@@ -154,6 +163,9 @@ export class MarketComponent implements OnInit {
           const skinWithState = instance.skin as SkinWithImageState;
           skinWithState.imageLoaded = undefined;
           skinWithState.imageFallbackAttempted = false;
+          skinWithState.backgroundImageAttempted = false;
+          skinWithState.imageLoading = false;
+          skinWithState.fallbackAttempted = false;
         }
       });
       
@@ -247,72 +259,158 @@ export class MarketComponent implements OnInit {
     this.filteredListings = items;
   }
 
+  // Enhanced rarity color method
   getRarityColor(rarity: string): string {
     const colors: { [key: string]: string } = {
-      'white': 'text-gray-300',
+      'white': 'text-gray-200',
       'blue': 'text-blue-400',
       'dark_blue': 'text-blue-600',
       'purple': 'text-purple-400',
       'pink': 'text-pink-400',
       'red': 'text-red-400',
-      'contraband': 'text-yellow-400'
+      'contraband': 'text-yellow-300'
     };
     return colors[rarity] || 'text-white';
   }
 
+  // Enhanced rarity border color method
   getRarityBorderColor(rarity: string): string {
     const colors: { [key: string]: string } = {
-      'white': 'border-gray-300/50',
-      'blue': 'border-blue-400/50',
-      'dark_blue': 'border-blue-600/50',
-      'purple': 'border-purple-400/50',
-      'pink': 'border-pink-400/50',
-      'red': 'border-red-400/50',
+      'white': 'border-gray-300/30',
+      'blue': 'border-blue-400/40',
+      'dark_blue': 'border-blue-600/40',
+      'purple': 'border-purple-400/40',
+      'pink': 'border-pink-400/40',
+      'red': 'border-red-400/40',
       'contraband': 'border-yellow-400/50'
     };
     return colors[rarity] || 'border-white/20';
   }
 
-  // FINAL IMAGE HANDLING METHODS
-  getSkinImageUrl(skin: any): string {
-    console.log('=== IMAGE URL GENERATION ===');
-    console.log('Skin name:', skin?.name);
-    console.log('Database image_path:', skin?.image_path);
+  // Enhanced background style method
+  getSkinBackgroundStyle(skin: any): string {
+    const imageUrl = this.getSkinImageUrl(skin);
+    this.preloadImage(imageUrl, skin);
+    return `url('${imageUrl}')`;
+  }
 
+  // Enhanced image URL method
+  getSkinImageUrl(skin: any): string {
+    console.log('=== BACKGROUND IMAGE URL GENERATION ===');
+    console.log('Skin name:', skin?.name);
+    console.log('Raw database image_path:', skin?.image_path);
+    
     if (skin?.image_path && skin.image_path !== null && skin.image_path !== '') {
       let imagePath = skin.image_path;
-
-      // Remove "./" prefix if present
-      if (imagePath.startsWith('./')) {
-        imagePath = imagePath.substring(2);
+      
+      // Clean the path
+      const pathParts = imagePath.split(/[\\\/]+/);
+      const filename = pathParts[pathParts.length - 1];
+      const cleanFilename = filename.replace(/^\.+/, '').replace(/[<>:"|?*]/g, '').trim();
+      
+      if (cleanFilename && cleanFilename.length > 0) {
+        if (!this.hasImageExtension(cleanFilename)) {
+          const pngUrl = `/assets/skins/${cleanFilename}.png`;
+          console.log('Generated PNG background URL:', pngUrl);
+          return pngUrl;
+        } else {
+          const finalUrl = `/assets/skins/${cleanFilename}`;
+          console.log('Generated background URL with extension:', finalUrl);
+          return finalUrl;
+        }
       }
-
-      // If no extension, we'll let the error handler try different extensions
-      if (!this.hasImageExtension(imagePath)) {
-        // Start with PNG since that's what you have
-        const pngUrl = `/assets/skins/${imagePath}.png`;
-        console.log('No extension found, trying PNG first:', pngUrl);
-        return pngUrl;
-      }
-
-      // If extension already present, use as-is
-      const finalUrl = `/assets/skins/${imagePath}`;
-      console.log('Extension present, using:', finalUrl);
-      return finalUrl;
     }
-
-    // Fallback
-    console.log('No image_path, using default fallback');
+    
+    console.log('Using fallback background URL');
     return '/assets/skins/AWP_Dragon_Lore.png';
   }
 
-  // Helper method to check if path has image extension
+  // Preload image to check if it exists and update loading state
+  private preloadImage(imageUrl: string, skin: any): void {
+    const skinWithState = skin as SkinWithImageState;
+    
+    if (skinWithState.backgroundImageAttempted) {
+      return;
+    }
+    
+    skinWithState.backgroundImageAttempted = true;
+    skinWithState.imageLoading = true;
+    skinWithState.imageLoaded = false;
+    
+    const img = new Image();
+    
+    img.onload = () => {
+      console.log('✅ Background image loaded:', skin.name, imageUrl);
+      skinWithState.imageLoaded = true;
+      skinWithState.imageLoading = false;
+    };
+    
+    img.onerror = () => {
+      console.log('❌ Background image failed:', skin.name, imageUrl);
+      skinWithState.imageLoaded = false;
+      skinWithState.imageLoading = false;
+      
+      if (!skinWithState.fallbackAttempted) {
+        skinWithState.fallbackAttempted = true;
+        const alternativeUrl = imageUrl.includes('.png') ? 
+          imageUrl.replace('.png', '.jpg') : 
+          imageUrl.replace('.jpg', '.png');
+        
+        console.log('🔄 Trying alternative background format:', alternativeUrl);
+        this.preloadAlternativeImage(alternativeUrl, skin);
+      }
+    };
+    
+    img.src = imageUrl;
+  }
+
+  // Preload alternative image format
+  private preloadAlternativeImage(imageUrl: string, skin: any): void {
+    const skinWithState = skin as SkinWithImageState;
+    skinWithState.imageLoading = true;
+    
+    const img = new Image();
+    
+    img.onload = () => {
+      console.log('✅ Alternative background image loaded:', skin.name, imageUrl);
+      skinWithState.imageLoaded = true;
+      skinWithState.imageLoading = false;
+      skinWithState.alternativeImageUrl = imageUrl;
+    };
+    
+    img.onerror = () => {
+      console.log('💀 All background image formats failed:', skin.name);
+      skinWithState.imageLoaded = false;
+      skinWithState.imageLoading = false;
+    };
+    
+    img.src = imageUrl;
+  }
+
+  // Check if image is currently loading
+  isImageLoading(skin: any): boolean {
+    const skinWithState = skin as SkinWithImageState;
+    return skinWithState.imageLoading === true;
+  }
+
+  // Check if image is loaded successfully
+  isImageLoaded(skin: any): boolean {
+    const skinWithState = skin as SkinWithImageState;
+    return skinWithState.imageLoaded === true;
+  }
+
+  // Get the working image URL (original or alternative)
+  getWorkingImageUrl(skin: any): string {
+    const skinWithState = skin as SkinWithImageState;
+    return skinWithState.alternativeImageUrl || this.getSkinImageUrl(skin);
+  }
+
+  // Keep your existing helper method
   private hasImageExtension(path: string): boolean {
     return path.endsWith('.jpg') || path.endsWith('.jpeg') || path.endsWith('.png') || path.endsWith('.webp');
   }
 
-
-
+  // Legacy image methods for compatibility
   onImageLoad(event: any, skin: any): void {
     const skinWithState = skin as SkinWithImageState;
     skinWithState.imageLoaded = true;
@@ -337,16 +435,21 @@ export class MarketComponent implements OnInit {
     return skinWithState.imageLoaded === false;
   }
 
+  // Enhanced buy skin method with better UX
   async buySkin(listing: any): Promise<void> {
     if (this.userBalance < listing.price) {
-      alert('Insufficient balance!');
+      this.showInsufficientFundsNotification();
       return;
     }
+
+    // Add loading state to button
+    listing.purchasing = true;
 
     if (confirm(`Buy ${listing.skin.name} for $${listing.price}?`)) {
       try {
         const result = await this.marketService.buySkin(listing.id).toPromise();
-        alert('Purchase successful!');
+        
+        this.showSuccessNotification(`Successfully purchased ${listing.skin.name}!`);
         
         if (result?.newBalance !== undefined) {
           this.userBalance = result.newBalance;
@@ -359,10 +462,54 @@ export class MarketComponent implements OnInit {
         
       } catch (error) {
         console.error('Error buying skin:', error);
-        alert('Purchase failed. Please try again.');
+        this.showErrorNotification('Purchase failed. Please try again.');
         this.loadUserBalance();
+      } finally {
+        listing.purchasing = false;
       }
+    } else {
+      listing.purchasing = false;
     }
+  }
+
+  // Notification methods
+  private showInsufficientFundsNotification(): void {
+    console.log('Insufficient funds notification');
+    // You can implement a proper notification system here
+  }
+
+  private showSuccessNotification(message: string): void {
+    console.log('Success:', message);
+    alert(message); // Replace with proper notification
+  }
+
+  private showErrorNotification(message: string): void {
+    console.log('Error:', message);
+    alert(message); // Replace with proper notification
+  }
+
+  // Check if user can afford the item
+  canAfford(listing: any): boolean {
+    return this.userBalance >= listing.price;
+  }
+
+  // Get button text based on affordability and state
+  getButtonText(listing: any): string {
+    if (listing.purchasing) {
+      return 'Purchasing...';
+    }
+    return this.canAfford(listing) ? 'Buy Now' : 'Insufficient Funds';
+  }
+
+  // Get button class based on state
+  getButtonClass(listing: any): string {
+    const baseClass = 'action-btn';
+    
+    if (listing.purchasing) {
+      return `${baseClass} purchasing-btn`;
+    }
+    
+    return this.canAfford(listing) ? `${baseClass} buy-btn` : `${baseClass} insufficient-btn`;
   }
 
   openSellModal(): void {

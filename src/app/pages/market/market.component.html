@@ -1,7 +1,4 @@
-<img src="/assets/skins/AWP_Dragon_Lore.jpg" style="width: 200px;" />
-
-
-<!-- src/app/pages/market/market.component.html - FINAL VERSION -->
+<!-- src/app/pages/market/market.component.html - UPDATED WITH NEON ANIMATIONS -->
 <div class="max-w-7xl mx-auto py-8">
   <!-- Header -->
   <div class="flex justify-between items-center mb-8">
@@ -183,83 +180,118 @@
     <p class="text-gray-300 ml-4">Loading market...</p>
   </div>
 
-  <!-- Market Listings -->
+  <!-- Market Listings with Neon Effects -->
   <div *ngIf="!loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <div 
       *ngFor="let listing of filteredListings; trackBy: trackById"
-      class="card group hover:scale-105 transition-all duration-300"
-      [class]="getRarityBorderColor(listing.skin.rarity)"
+      class="skin-card group transition-all duration-300 hover:scale-105"
+      [class]="'rarity-' + listing.skin.rarity"
+      [class.high-value-item]="listing.price > 1000"
+      [class.ultra-rare]="listing.skin.rarity === 'contraband'"
     >
-      <!-- Skin Image Container with Layered Approach -->
-      <div class="skin-image-container aspect-square rounded-lg mb-4 relative overflow-hidden border"
-           [class]="getRarityBorderColor(listing.skin.rarity)">
-        
-        <!-- Background Gradient -->
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"></div>
-        
-        <!-- Fallback Emoji (always present, covered by image when loaded) -->
-        <div class="absolute inset-0 flex items-center justify-center text-4xl text-gray-600 z-10">
-          🔫
-        </div>
-        
-        <!-- Actual Skin Image (covers emoji when loaded successfully) -->
-        <img 
-          [src]="getSkinImageUrl(listing.skin)" 
-          [alt]="listing.skin.name"
-          (load)="onImageLoad($event, listing.skin)"
-          (error)="onImageError($event, listing.skin)"
-          class="skin-image absolute inset-0 w-full h-full object-cover rounded-lg transition-opacity duration-300"
-          [class.opacity-100]="isImageVisible(listing.skin)"
-          [class.opacity-0]="!isImageVisible(listing.skin)"
-          [style.z-index]="isImageVisible(listing.skin) ? '20' : '5'" />
-        
-        <!-- Badges (highest z-index) -->
-        <div class="absolute top-2 left-2 flex flex-col gap-1 z-30">
-          <span *ngIf="listing.is_stattrak" 
-                class="px-2 py-1 bg-orange-500 text-white text-xs rounded font-semibold shadow-lg">
-            ST™
-          </span>
-          <span *ngIf="listing.is_souvenir" 
-                class="px-2 py-1 bg-yellow-500 text-black text-xs rounded font-semibold shadow-lg">
-            Souvenir
-          </span>
-        </div>
-
-        <!-- Float Value (highest z-index) -->
-        <div class="absolute top-2 right-2 z-30">
-          <span class="px-2 py-1 bg-black/70 text-white text-xs rounded shadow-lg">
-            {{ listing.float_value | number:'1.4-4' }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Skin Info -->
-      <div class="space-y-3">
-        <div>
-          <h3 class="font-semibold text-white group-hover:text-cs-blue transition-colors">
-            {{ listing.skin.name }}
-          </h3>
-          <p class="text-sm text-gray-400">{{ listing.skin.weapon_type }}</p>
-          <p class="text-sm" [class]="getRarityColor(listing.skin.rarity)">
-            {{ listing.skin.rarity | titlecase }}
-          </p>
-        </div>
-
-        <div class="flex justify-between items-center text-sm text-gray-400">
-          <span>{{ listing.wear | titlecase }}</span>
-          <span>by {{ listing.owner.username }}</span>
-        </div>
-
-        <div class="flex justify-between items-center">
-          <div class="text-2xl font-bold text-cs-green">
-            ${{ listing.price | number:'1.2-2' }}
+      <!-- Animated Neon Border -->
+      <div class="neon-border" [class]="'neon-' + listing.skin.rarity"></div>
+      
+      <!-- Card Content -->
+      <div class="card-inner relative overflow-hidden">
+        <!-- Skin Image Container with Background -->
+        <div class="skin-background-container aspect-square rounded-lg mb-4 relative overflow-hidden border"
+             [class]="getRarityBorderColor(listing.skin.rarity)"
+             [style.background-image]="getSkinBackgroundStyle(listing.skin)"
+             [style.background-size]="'cover'"
+             [style.background-position]="'center'"
+             [style.background-repeat]="'no-repeat'">
+          
+          <!-- Fallback gradient when no image -->
+          <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"
+               [class.opacity-100]="!isImageLoaded(listing.skin)"
+               [class.opacity-0]="isImageLoaded(listing.skin)">
           </div>
-          <button 
-            (click)="buySkin(listing)"
-            [disabled]="userBalance < listing.price"
-            class="btn-primary text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            {{ userBalance >= listing.price ? 'Buy Now' : 'Insufficient Funds' }}
-          </button>
+          
+          <!-- Fallback Emoji -->
+          <div class="absolute inset-0 flex items-center justify-center text-4xl text-gray-600 transition-opacity duration-300"
+               [class.opacity-100]="!isImageLoaded(listing.skin)"
+               [class.opacity-0]="isImageLoaded(listing.skin)">
+            🔫
+          </div>
+          
+          <!-- Dark overlay for better text readability -->
+          <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+          
+          <!-- Enhanced Badges -->
+          <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
+            <span *ngIf="listing.is_stattrak" 
+                  class="badge stattrak-badge">
+              ST™
+            </span>
+            <span *ngIf="listing.is_souvenir" 
+                  class="badge souvenir-badge">
+              Souvenir
+            </span>
+          </div>
+
+          <!-- Float Value -->
+          <div class="absolute top-2 right-2 z-10">
+            <span class="float-badge">
+              {{ listing.float_value | number:'1.4-4' }}
+            </span>
+          </div>
+          
+          <!-- Loading indicator -->
+          <div *ngIf="isImageLoading(listing.skin)" 
+               class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+
+        <!-- Skin Info -->
+        <div class="skin-info space-y-3">
+          <!-- Title Section -->
+          <div class="title-section">
+            <h3 class="skin-name font-semibold text-white group-hover:text-cs-blue transition-colors">
+              {{ listing.skin.name }}
+            </h3>
+            <p class="weapon-type text-sm text-gray-400">{{ listing.skin.weapon_type }}</p>
+            <p class="rarity-text text-sm" [class]="getRarityColor(listing.skin.rarity)">
+              {{ listing.skin.rarity | titlecase }}
+            </p>
+          </div>
+
+          <!-- Meta Info -->
+          <div class="meta-info flex justify-between items-center text-sm text-gray-400">
+            <span class="wear-text">{{ listing.wear | titlecase }}</span>
+            <span class="owner-text">by {{ listing.owner.username }}</span>
+          </div>
+
+          <!-- Price Section -->
+          <div class="price-section">
+            <div class="price-text text-2xl font-bold text-cs-green text-center">
+              ${{ listing.price | number:'1.2-2' }}
+            </div>
+          </div>
+          
+          <!-- Action Button Section - FULL WIDTH AT BOTTOM -->
+          <div class="action-section">
+            <!-- Buy Button (sufficient funds) -->
+            <button 
+              *ngIf="canAfford(listing)"
+              (click)="buySkin(listing)"
+              [disabled]="listing.purchasing"
+              [class]="getButtonClass(listing)">
+              <span class="btn-text">{{ getButtonText(listing) }}</span>
+            </button>
+            
+            <!-- Insufficient Funds Button -->
+            <button 
+              *ngIf="!canAfford(listing)"
+              disabled
+              class="action-btn insufficient-btn">
+              <span class="btn-text-insufficient">
+                <span class="insufficient-main">Insufficient</span>
+                <span class="insufficient-sub">Funds</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -309,33 +341,31 @@
             [class.border-cs-blue]="selectedSkinToSell?.id === skin.id"
             (click)="selectSkinToSell(skin)">
             
-            <!-- Skin Image in Modal (same layered approach) -->
-            <div class="skin-image-container aspect-square rounded-lg mb-3 relative overflow-hidden border"
-                 [class]="getRarityBorderColor(skin.skin.rarity)">
+            <!-- Skin Image in Modal -->
+            <div class="skin-background-container aspect-square rounded-lg mb-3 relative overflow-hidden border"
+                 [class]="getRarityBorderColor(skin.skin.rarity)"
+                 [style.background-image]="getSkinBackgroundStyle(skin.skin)"
+                 [style.background-size]="'cover'"
+                 [style.background-position]="'center'"
+                 [style.background-repeat]="'no-repeat'">
               
               <!-- Background and Fallback -->
-              <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"></div>
-              <div class="absolute inset-0 flex items-center justify-center text-3xl text-gray-600 z-10">🔫</div>
-              
-              <!-- Actual Image -->
-              <img 
-                [src]="getSkinImageUrl(skin.skin)" 
-                [alt]="skin.skin.name"
-                (load)="onImageLoad($event, skin.skin)"
-                (error)="onImageError($event, skin.skin)"
-                class="skin-image absolute inset-0 w-full h-full object-cover rounded-lg transition-opacity duration-300"
-                [class.opacity-100]="isImageVisible(skin.skin)"
-                [class.opacity-0]="!isImageVisible(skin.skin)"
-                [style.z-index]="isImageVisible(skin.skin) ? '20' : '5'" />
+              <div class="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900"
+                   [class.opacity-100]="!isImageLoaded(skin.skin)"
+                   [class.opacity-0]="isImageLoaded(skin.skin)">
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center text-3xl text-gray-600"
+                   [class.opacity-100]="!isImageLoaded(skin.skin)"
+                   [class.opacity-0]="isImageLoaded(skin.skin)">🔫</div>
               
               <!-- Badges -->
               <div class="absolute top-2 left-2 flex flex-col gap-1 z-30">
                 <span *ngIf="skin.is_stattrak" 
-                      class="px-2 py-1 bg-orange-500 text-white text-xs rounded font-semibold">
+                      class="badge stattrak-badge">
                   ST™
                 </span>
                 <span *ngIf="skin.is_souvenir" 
-                      class="px-2 py-1 bg-yellow-500 text-black text-xs rounded font-semibold">
+                      class="badge souvenir-badge">
                   Souvenir
                 </span>
               </div>
